@@ -20,7 +20,7 @@ client.on("messageCreate", async (message) => {
 
     if (!isThread) {
         const warning = await message.channel.send(
-            `hey ${message.author} 👋 please keep discussion inside threads!`
+            `hey ${message.author}bb!👋Check pin messages.. & please keep discussion inside threads!^^`
         );
         setTimeout(() => warning.delete(), 8000);
     }
