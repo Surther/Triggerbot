@@ -32,7 +32,7 @@ client.on("messageCreate", async (message) => {
 
         if (messageCount[userId] >= 2) {
             const warning = await message.channel.send(
-                `hey ${message.author}bb! 🔔 Check pin messages.. & please keep discussion inside threads!^^`
+                `hey ${message.author} bb! Check pin messages. Please keep discussion inside threads!^^`
             );
             setTimeout(() => warning.delete(), 8000);
             messageCount[userId] = 0;
