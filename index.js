@@ -13,6 +13,13 @@ const messageCount = {};
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
+
+    // If someone tags the bot
+    if (message.mentions.has(client.user)) {
+        await message.reply("Shh... Making money rn....");
+        return;
+    }
+
     if (message.channel.id !== CHANNEL_ID) return;
 
     const isThread =
@@ -28,7 +35,7 @@ client.on("messageCreate", async (message) => {
                 `hey ${message.author}bb! 🔔 Check pin messages.. & please keep discussion inside threads!^^`
             );
             setTimeout(() => warning.delete(), 8000);
-            messageCount[userId] = 0; // reset after warning
+            messageCount[userId] = 0;
         }
     }
 });
