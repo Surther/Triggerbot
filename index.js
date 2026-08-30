@@ -9,6 +9,7 @@ const client = new Client({
 });
 
 const CHANNEL_ID = "1508029068363300885";
+const messageCount = {};
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
@@ -19,10 +20,16 @@ client.on("messageCreate", async (message) => {
         message.channel.type === ChannelType.PrivateThread;
 
     if (!isThread) {
-        const warning = await message.channel.send(
-            `hey ${message.author}bb!👋Check pin messages.. & please keep discussion inside threads!^^`
-        );
-        setTimeout(() => warning.delete(), 8000);
+        const userId = message.author.id;
+        messageCount[userId] = (messageCount[userId] || 0) + 1;
+
+        if (messageCount[userId] >= 2) {
+            const warning = await message.channel.send(
+                `hey ${message.author}bb! 🔔 Check pin messages.. & please keep discussion inside threads!^^`
+            );
+            setTimeout(() => warning.delete(), 8000);
+            messageCount[userId] = 0; // reset after warning
+        }
     }
 });
 
