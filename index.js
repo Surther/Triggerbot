@@ -16,7 +16,7 @@ client.on("messageCreate", async (message) => {
 
     // If someone tags the bot
     if (message.mentions.has(client.user)) {
-        await message.reply("Shh... Making money rn....");
+        await message.reply("Shh... preparing for war rn!");
         return;
     }
 
