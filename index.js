@@ -12,10 +12,9 @@ const client = new Client({
 
 const CHANNEL_ID = "1508029068363300885";
 const ROLE_CHANNEL_ID = "1118955072756392008";
+const REACTION_MESSAGE_ID = "1544362051055525990";
 const messageCount = {};
 
-// ⬇️ REACTION ROLES
-const REACTION_MESSAGE_ID = "1544362051055525990";
 const reactionRoles = [
     { emoji: "gw_origins:1509624557722402917", roleId: "1150140051590762526" },
     { emoji: "moneyfly:1533153404204093650", roleId: "1533141586416894063" },
@@ -25,7 +24,6 @@ const reactionRoles = [
     { emoji: "pepegamer:1533143536554348796", roleId: "1533140088609837217" },
 ];
 
-// ⬇️ BUTTON ROLES
 const roles = [
     { label: "Goat Calls 🐐", roleId: "1533173333598666923" },
     { label: "Arash Calls 🕵🏻", roleId: "1533173630106599555" },
@@ -43,6 +41,26 @@ client.once("ready", async () => {
     if (roleMsgSent) return;
     roleMsgSent = true;
 
+    // Add reactions FIRST
+    try {
+        const reactionChannel = await client.channels.fetch(ROLE_CHANNEL_ID);
+        const reactionMsg = await reactionChannel.messages.fetch(REACTION_MESSAGE_ID);
+
+        for (const r of reactionRoles) {
+            const emoji = client.emojis.cache.find(e => `${e.name}:${e.id}` === r.emoji);
+            if (emoji) {
+                await reactionMsg.react(emoji);
+                console.log(`Reacted with ${r.emoji}`);
+            } else {
+                console.log(`Emoji not found: ${r.emoji}`);
+            }
+        }
+        console.log("Reactions done!");
+    } catch (e) {
+        console.error("Reaction error:", e);
+    }
+
+    // Button embed check
     try {
         const channel = await client.channels.fetch(ROLE_CHANNEL_ID);
         const messages = await channel.messages.fetch({ limit: 10 });
