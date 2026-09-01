@@ -1,5 +1,4 @@
 const { Client, GatewayIntentBits, ChannelType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
-const http = require("http");
 
 const client = new Client({
     intents: [
@@ -7,6 +6,7 @@ const client = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMessageReactions,
     ],
 });
 
@@ -14,6 +14,18 @@ const CHANNEL_ID = "1508029068363300885";
 const ROLE_CHANNEL_ID = "1118955072756392008";
 const messageCount = {};
 
+// ⬇️ REACTION ROLES
+const REACTION_MESSAGE_ID = "1544362051055525990";
+const reactionRoles = [
+    { emoji: "gw_origins:1509624557722402917", roleId: "1150140051590762526" },
+    { emoji: "moneyfly:1533153404204093650", roleId: "1533141586416894063" },
+    { emoji: "Raidor:1533143097582682236", roleId: "1524330260030816266" },
+    { emoji: "scam_origins:1509624479708352653", roleId: "1153758935300440064" },
+    { emoji: "pepembmbusiness:1533158525650604226", roleId: "1533140085539864626" },
+    { emoji: "pepegamer:1533143536554348796", roleId: "1533140088609837217" },
+];
+
+// ⬇️ BUTTON ROLES
 const roles = [
     { label: "Goat Calls 🐐", roleId: "1533173333598666923" },
     { label: "Arash Calls 🕵🏻", roleId: "1533173630106599555" },
@@ -23,99 +35,11 @@ const roles = [
     { label: "Early Finds 🥷🏻", roleId: "1533173621621657872" },
 ];
 
-// API SERVER FOR DASHBOARD
-const server = http.createServer(async (req, res) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-    if (req.method === "OPTIONS") { res.writeHead(200); res.end(); return; }
-
-    if (req.method === "GET" && req.url === "/") {
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ status: "Origins Bot is running!" }));
-        return;
-    }
-
-    if (req.method === "POST" && req.url === "/send") {
-        let body = "";
-        req.on("data", chunk => body += chunk);
-        req.on("end", async () => {
-            try {
-                const { channelId, embed, components } = JSON.parse(body);
-                const channel = await client.channels.fetch(channelId);
-
-                const embedObj = new EmbedBuilder()
-                    .setTitle(embed.title || "")
-                    .setDescription(embed.description || "")
-                    .setColor(embed.color || "#00f2f2");
-
-                if (embed.image) embedObj.setImage(embed.image);
-
-                const rows = [];
-                if (components && components.length) {
-                    let currentRow = [];
-                    for (const comp of components) {
-                        currentRow.push(
-                            new ButtonBuilder()
-                                .setCustomId(comp.customId)
-                                .setLabel(comp.label)
-                                .setStyle(ButtonStyle.Secondary)
-                        );
-                        if (currentRow.length === 3) {
-                            rows.push(new ActionRowBuilder().addComponents(...currentRow));
-                            currentRow = [];
-                        }
-                    }
-                    if (currentRow.length > 0) {
-                        rows.push(new ActionRowBuilder().addComponents(...currentRow));
-                    }
-                }
-
-                const payload = { embeds: [embedObj] };
-                if (rows.length) payload.components = rows;
-
-                const msg = await channel.send(payload);
-
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ success: true, messageId: msg.id }));
-            } catch (e) {
-                console.error(e);
-                res.writeHead(500, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ error: e.message }));
-            }
-        });
-        return;
-    }
-
-    if (req.method === "POST" && req.url === "/delete") {
-        let body = "";
-        req.on("data", chunk => body += chunk);
-        req.on("end", async () => {
-            try {
-                const { channelId, messageId } = JSON.parse(body);
-                const channel = await client.channels.fetch(channelId);
-                const msg = await channel.messages.fetch(messageId);
-                await msg.delete();
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ success: true }));
-            } catch (e) {
-                res.writeHead(500, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ error: e.message }));
-            }
-        });
-        return;
-    }
-
-    res.writeHead(404); res.end();
-});
-
-server.listen(process.env.PORT || 3000, () => console.log("API running!"));
-
 let roleMsgSent = false;
 
 client.once("ready", async () => {
     console.log(`Logged in as ${client.user.tag}`);
+
     if (roleMsgSent) return;
     roleMsgSent = true;
 
@@ -162,17 +86,66 @@ client.once("ready", async () => {
     }
 });
 
+// REACTION ADD
+client.on("messageReactionAdd", async (reaction, user) => {
+    if (user.bot) return;
+    if (reaction.message.id !== REACTION_MESSAGE_ID) return;
+
+    if (reaction.partial) await reaction.fetch();
+
+    const emojiName = reaction.emoji.id
+        ? `${reaction.emoji.name}:${reaction.emoji.id}`
+        : reaction.emoji.name;
+
+    const roleData = reactionRoles.find(r => r.emoji === emojiName);
+    if (!roleData) return;
+
+    const guild = reaction.message.guild;
+    const member = await guild.members.fetch(user.id);
+    const role = guild.roles.cache.get(roleData.roleId);
+
+    if (role && member) {
+        await member.roles.add(role);
+        console.log(`Added ${role.name} to ${user.tag}`);
+    }
+});
+
+// REACTION REMOVE
+client.on("messageReactionRemove", async (reaction, user) => {
+    if (user.bot) return;
+    if (reaction.message.id !== REACTION_MESSAGE_ID) return;
+
+    if (reaction.partial) await reaction.fetch();
+
+    const emojiName = reaction.emoji.id
+        ? `${reaction.emoji.name}:${reaction.emoji.id}`
+        : reaction.emoji.name;
+
+    const roleData = reactionRoles.find(r => r.emoji === emojiName);
+    if (!roleData) return;
+
+    const guild = reaction.message.guild;
+    const member = await guild.members.fetch(user.id);
+    const role = guild.roles.cache.get(roleData.roleId);
+
+    if (role && member) {
+        await member.roles.remove(role);
+        console.log(`Removed ${role.name} from ${user.tag}`);
+    }
+});
+
+// BUTTON ROLES
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isButton()) return;
 
     try {
-        const roleId = interaction.customId.replace("role_", "");
+        const roleId = interaction.customId;
         const member = interaction.member;
-        const role = interaction.guild.roles.cache.get(roleId) || interaction.guild.roles.cache.get(interaction.customId);
+        const role = interaction.guild.roles.cache.get(roleId);
 
         if (!role) return interaction.reply({ content: "Role not found!", ephemeral: true });
 
-        if (member.roles.cache.has(role.id)) {
+        if (member.roles.cache.has(roleId)) {
             await member.roles.remove(role);
             await interaction.reply({ content: `Removed **${role.name}**!`, ephemeral: true });
         } else {
@@ -187,6 +160,7 @@ client.on("interactionCreate", async (interaction) => {
     }
 });
 
+// THREAD WARNING
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
 
