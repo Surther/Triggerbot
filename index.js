@@ -49,7 +49,7 @@ client.once("ready", async () => {
                 `<a:blue_arrow:1533138835637272646> <#1231623313617584129> Early Finds 🥷🏻`
             )
             .setImage("https://media.discordapp.net/attachments/1129724505032503306/1544296065828790302/83a4c5dc-a0ec-403c-a079-53b003b8e528.png?ex=6a97fd49&is=6a96abc9&hm=a64fc277516e3f47cd8c462e949a8cf864cd3c8613892cc5a8088ec0a0c0b2e0&=&format=webp&quality=lossless&width=2048&height=683")
-            .setColor("#000000");
+            .setColor("#00f2f2");
 
         const row1 = new ActionRowBuilder().addComponents(
             roles.slice(0, 3).map(r =>
