@@ -30,57 +30,73 @@ client.once("ready", async () => {
     if (roleMsgSent) return;
     roleMsgSent = true;
 
-    const channel = await client.channels.fetch(ROLE_CHANNEL_ID);
+    try {
+        const channel = await client.channels.fetch(ROLE_CHANNEL_ID);
 
-    const embed = new EmbedBuilder()
-        .setTitle("Research & Calls")
-        .setDescription(
-            `<a:blue_arrow:1533138835637272646> <#1118959364313718816>\n` +
-            `<a:blue_arrow:1533138835637272646> <#1509203944885321799>\n` +
-            `<a:blue_arrow:1533138835637272646> <#1508874990416691321> Mint Analysis 🔍\n` +
-            `<a:blue_arrow:1533138835637272646> <#1537367024844541952> Daily Mint Reminders 🗓️\n` +
-            `<a:blue_arrow:1533138835637272646> <#1510554220460380230> Airdrops 🪂\n` +
-            `<a:blue_arrow:1533138835637272646> <#1231623313617584129> Early Finds 🥷🏻`
-        )
-        .setImage("https://media.discordapp.net/attachments/1129724505032503306/1544296065828790302/83a4c5dc-a0ec-403c-a079-53b003b8e528.png?ex=6a97fd49&is=6a96abc9&hm=a64fc277516e3f47cd8c462e949a8cf864cd3c8613892cc5a8088ec0a0c0b2e0&=&format=webp&quality=lossless&width=2048&height=683") // ⬅️ replace with your image URL
-        .setColor("#000000");
+        // Check if embed already exists
+        const messages = await channel.messages.fetch({ limit: 10 });
+        const existing = messages.find(m => m.author.id === client.user.id && m.embeds.length > 0);
+        if (existing) return; // Don't send if already exists
 
-    const row1 = new ActionRowBuilder().addComponents(
-        roles.slice(0, 3).map(r =>
-            new ButtonBuilder()
-                .setCustomId(r.roleId)
-                .setLabel(r.label)
-                .setStyle(ButtonStyle.Secondary)
-        )
-    );
+        const embed = new EmbedBuilder()
+            .setTitle("Research & Calls")
+            .setDescription(
+                `<a:blue_arrow:1533138835637272646> <#1118959364313718816>\n` +
+                `<a:blue_arrow:1533138835637272646> <#1509203944885321799>\n` +
+                `<a:blue_arrow:1533138835637272646> <#1508874990416691321> Mint Analysis 🔍\n` +
+                `<a:blue_arrow:1533138835637272646> <#1537367024844541952> Daily Mint Reminders 🗓️\n` +
+                `<a:blue_arrow:1533138835637272646> <#1510554220460380230> Airdrops 🪂\n` +
+                `<a:blue_arrow:1533138835637272646> <#1231623313617584129> Early Finds 🥷🏻`
+            )
+            .setImage("https://media.discordapp.net/attachments/1129724505032503306/1544296065828790302/83a4c5dc-a0ec-403c-a079-53b003b8e528.png?ex=6a97fd49&is=6a96abc9&hm=a64fc277516e3f47cd8c462e949a8cf864cd3c8613892cc5a8088ec0a0c0b2e0&=&format=webp&quality=lossless&width=2048&height=683")
+            .setColor("#00f2f2");
 
-    const row2 = new ActionRowBuilder().addComponents(
-        roles.slice(3, 6).map(r =>
-            new ButtonBuilder()
-                .setCustomId(r.roleId)
-                .setLabel(r.label)
-                .setStyle(ButtonStyle.Secondary)
-        )
-    );
+        const row1 = new ActionRowBuilder().addComponents(
+            roles.slice(0, 3).map(r =>
+                new ButtonBuilder()
+                    .setCustomId(r.roleId)
+                    .setLabel(r.label)
+                    .setStyle(ButtonStyle.Secondary)
+            )
+        );
 
-    await channel.send({ embeds: [embed], components: [row1, row2] });
+        const row2 = new ActionRowBuilder().addComponents(
+            roles.slice(3, 6).map(r =>
+                new ButtonBuilder()
+                    .setCustomId(r.roleId)
+                    .setLabel(r.label)
+                    .setStyle(ButtonStyle.Secondary)
+            )
+        );
+
+        await channel.send({ embeds: [embed], components: [row1, row2] });
+    } catch (error) {
+        console.error("Error sending embed:", error);
+    }
 });
 
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isButton()) return;
 
-    const roleId = interaction.customId;
-    const member = interaction.member;
-    const role = interaction.guild.roles.cache.get(roleId);
+    try {
+        const roleId = interaction.customId;
+        const member = interaction.member;
+        const role = interaction.guild.roles.cache.get(roleId);
 
-    if (!role) return interaction.reply({ content: "Role not found!", ephemeral: true });
+        if (!role) return interaction.reply({ content: "Role not found!", ephemeral: true });
 
-    if (member.roles.cache.has(roleId)) {
-        await member.roles.remove(role);
-        await interaction.reply({ content: `Removed **${role.name}**!`, ephemeral: true });
-    } else {
-        await member.roles.add(role);
-        await interaction.reply({ content: `Added **${role.name}**!`, ephemeral: true });
+        if (member.roles.cache.has(roleId)) {
+            await member.roles.remove(role);
+            await interaction.reply({ content: `Removed **${role.name}**!`, ephemeral: true });
+        } else {
+            await member.roles.add(role);
+            await interaction.reply({ content: `Added **${role.name}**!`, ephemeral: true });
+        }
+    } catch (error) {
+        console.error(error);
+        if (!interaction.replied) {
+            await interaction.reply({ content: "Something went wrong!", ephemeral: true });
+        }
     }
 });
 
