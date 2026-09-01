@@ -12,7 +12,7 @@ const client = new Client({
 
 const CHANNEL_ID = "1508029068363300885";
 const ROLE_CHANNEL_ID = "1118955072756392008";
-const REACTION_MESSAGE_ID = "1544362051055525990";
+const REACTION_MESSAGE_ID = "1544366236173869057";
 const messageCount = {};
 
 const reactionRoles = [
@@ -22,6 +22,7 @@ const reactionRoles = [
     { emoji: "scam_origins:1509624479708352653", roleId: "1153758935300440064" },
     { emoji: "pepembmbusiness:1533158525650604226", roleId: "1533140085539864626" },
     { emoji: "pepegamer:1533143536554348796", roleId: "1533140088609837217" },
+    { emoji: "coin_origin:1538876611250626673", roleId: "1533175818832973825" },
 ];
 
 const roles = [
