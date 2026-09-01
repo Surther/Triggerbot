@@ -14,12 +14,12 @@ const ROLE_CHANNEL_ID = "1118955072756392008";
 const messageCount = {};
 
 const roles = [
-    { label: "🐐", roleId: "1533173333598666923" },
-    { label: "🕵🏻", roleId: "1533173630106599555" },
-    { label: "🔍", roleId: "1533173639279542404" },
-    { label: "🗓️", roleId: "1543575688144224276" },
-    { label: "🪂", roleId: "1533174641168748615" },
-    { label: "🥷🏻", roleId: "1533173621621657872" },
+    { label: "Goat Calls 🐐", roleId: "1533173333598666923" },
+    { label: "Arash Calls 🕵🏻", roleId: "1533173630106599555" },
+    { label: "Mint Analysis 🔍", roleId: "1533173639279542404" },
+    { label: "Reminders 🗓️", roleId: "1543575688144224276" },
+    { label: "Airdrops 🪂", roleId: "1533174641168748615" },
+    { label: "Early Finds 🥷🏻", roleId: "1533173621621657872" },
 ];
 
 let roleMsgSent = false;
