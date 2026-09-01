@@ -22,7 +22,7 @@ const reactionRoles = [
     { emoji: "scam_origins:1509624479708352653", roleId: "1153758935300440064" },
     { emoji: "pepembmbusiness:1533158525650604226", roleId: "1533140085539864626" },
     { emoji: "pepegamer:1533143536554348796", roleId: "1533140088609837217" },
-    { emoji: "coin_origin:1538876611250626673", roleId: "1538876893023969391" },
+    { emoji: "coin_orgin:1538876611250626673", roleId: "1538876893023969391" },
 ];
 
 const roles = [
